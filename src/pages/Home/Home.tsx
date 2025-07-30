@@ -29,10 +29,6 @@ const SampleButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-bottom: 2rem;
-
-  &:hover {
-    opacity: 0.8;
-  }
 `;
 
 const ProductCard = styled.div`
@@ -42,19 +38,32 @@ const ProductCard = styled.div`
   border-radius: 8px;
 `;
 
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 1rem;
+`;
+
 export const Home: React.FC = () => {
   const { theme } = useContext(ThemeContext);
   const [products, setProducts] = useState([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get('https://fakestoreapi.com/products').then((response) => {
-      setProducts(response.data);
-    });
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('https://fakestoreapi.com/products');
+        setProducts(response.data);
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to fetch products. Please try again later.');
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleClick = () => {
     alert('Button clicked!');
-    // You can replace the alert with any action you want to perform
   };
 
   return (
@@ -62,6 +71,7 @@ export const Home: React.FC = () => {
       <ContentTitle>Main Content</ContentTitle>
       <SampleParagraph>This is a sample paragraph.</SampleParagraph>
       <SampleButton theme={theme} onClick={handleClick}>Click Me</SampleButton>
+      {error && <ErrorMessage>{error}</ErrorMessage>}
       <div>
         {products.map((product: any) => (
           <ProductCard key={product.id} theme={theme}>
